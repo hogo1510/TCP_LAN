@@ -1,14 +1,24 @@
-
 package main
 
 import (
     "fmt"
     "net"
+    "flag"
 )
 
 func main() {
-    // Luister op alle netwerkinterfaces op poort 8080
-    listener, err := net.Listen("tcp", ":8080")
+
+	var PORT string
+	flag.StringVar(&PORT, "p","","Poort waar de server runt")
+	flag.Parse()
+	if PORT == ""{
+	fmt.Println("geen poort gespecificeerd gebruik: ./LAN2.go -p <poort nummer>")
+	return
+	}
+	address :=  fmt.Sprintf(":%s", PORT)
+
+    //luister op alle netwerkinterfaces 
+    listener, err := net.Listen("tcp", address)
     if err != nil {
         fmt.Println("Fout bij het starten van de server:", err)
         return
@@ -16,7 +26,7 @@ func main() {
     defer listener.Close()
     fmt.Println("Server gestart. Wachtend op verbindingen...")
 
-    // Accepteer verbindingen van clients
+    //accepteer verbindingen van clients
     for {
         conn, err := listener.Accept()
         if err != nil {
@@ -25,7 +35,7 @@ func main() {
         }
         fmt.Println("Nieuwe verbinding geaccepteerd:", conn.RemoteAddr())
 
-        // Behandel de verbinding in een aparte goroutine
+        //behandel de verbinding in aparte goroutine
         go handleConnection(conn)
     }
 }
@@ -33,7 +43,7 @@ func main() {
 func handleConnection(conn net.Conn) {
     defer conn.Close()
 
-    // Ontvang berichten van de client en stuur ze terug
+    //ontvang berichten van de client
     buf := make([]byte, 1024)
     for {
         n, err := conn.Read(buf)
@@ -42,11 +52,12 @@ func handleConnection(conn net.Conn) {
             return
         }
         if n == 0 {
-            return // Verbinding verbroken door client
+		fmt.Println("Verbinding met client verbroken!")
+            return 
         }
         fmt.Printf("Ontvangen van %s: %s\n", conn.RemoteAddr(), string(buf[:n]))
 
-        // Stuur het ontvangen bericht terug naar de client
+        //terug sturen van bericht naar client
         _, err = conn.Write(buf[:n])
         if err != nil {
             fmt.Println("Fout bij het schrijven van gegevens:", err)
