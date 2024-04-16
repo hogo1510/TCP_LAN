@@ -5,17 +5,32 @@ import (
     "fmt"
     "net"
     "os"
+    "flag"
 )
 
 func main() {
-    if len(os.Args) != 2 {
-        fmt.Println("Gebruik: ./client <server_ip>")
+    if len(os.Args) != 3 {
+       
+    }
+    //serverIP, serverPOORT := os.Args[1], os.Args[2]
+    var serverIP string
+    var serverPORT string
+    flag.StringVar(&serverIP, "i","", "Zet hier de server IP")
+    flag.StringVar(&serverPORT, "p","", "Zet hier de server Poort")
+
+    flag.Parse()
+
+    if serverIP == "" || serverPORT == ""{
+        fmt.Println("Gebruik: ./client -i <server_ip> -p <server_poort>")
         return
     }
-    serverIP := os.Args[1]
+    fmt.Println("IP : ",serverIP)
+    fmt.Println("PORT : ",serverPORT)
 
-    // Verbinding maken met de server op opgegeven IP-adres op poort 8080
-    conn, err := net.Dial("tcp", serverIP+":8080")
+	//samenvoegen
+	address := fmt.Sprintf("%s:%s", serverIP, serverPORT)
+    // Verbinding maken met de server
+    conn, err := net.Dial("tcp", address)
     if err != nil {
         fmt.Println("Kan geen verbinding maken met server:", err)
         return
